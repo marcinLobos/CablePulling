@@ -30,35 +30,37 @@ def zastosuj_stylizacje_premium():
     st.markdown("""
     <style>
 
-    .stApp { border: 10px solid yellow !important; }
-    
-        /* Przycisk otwierania panelu - WIDOCZNY ZAWSZE (Red Alert Style) */
-        button[data-testid="collapsedControl"] {
-        background-color: #ff0000 !important; /* Czysta czerwień */
-        color: #ffffff !important;           /* Biała strzałka */
-        border: 2px solid #ffffff !important; /* Biała ramka dla kontrastu */
-        border-radius: 0 10px 10px 0 !important;
-        width: 50px !important;
-        height: 50px !important;
-        left: 0 !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        z-index: 999999 !important;
+   /* 1. Celujemy przez główny kontener (bardzo silne) */
+    .stApp header[data-testid="stHeader"] button[data-testid="collapsedControl"],
+    .stApp [data-testid="collapsedControl"],
+    button[aria-label="Open sidebar"] {
+    background-color: #ff0000 !important;
+    color: #ffffff !important;
+    border: 3px solid #ffffff !important; /* Jeszcze grubsza ramka */
+    border-radius: 0 12px 12px 0 !important;
+    width: 55px !important;
+    height: 55px !important;
+    display: flex !important;
+    opacity: 1 !important;
+    left: 0 !important;
+    z-index: 1000001 !important;
     }
 
-        /* Żeby strzałka w środku też była biała */
-        button[data-testid="collapsedControl"] svg {
-        fill: #ffffff !important;
-        stroke: #ffffff !important;
-        width: 30px !important;
-        height: 30px !important;
+    /* 2. Wymuszamy kolor samej ikonki (strzałek >>) */
+    [data-testid="collapsedControl"] svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    width: 35px !important;
+    height: 35px !important;
     }
 
-        /* Efekt po najechaniu - lekka zmiana odcienia */
-        button[data-testid="collapsedControl"]:hover {
-        background-color: #cc0000 !important;
-        border-color: #00ffcc !important; /* Twój morski akcent przy najechaniu */
+    /* 3. Naprawa 'ducha' - żeby tło nie znikało po kliknięciu */
+    [data-testid="collapsedControl"]:focus, 
+    [data-testid="collapsedControl"]:active {
+    background-color: #ff0000 !important;
+    outline: none !important;
     }
+
     </style>""", unsafe_allow_html=True)
 
 
