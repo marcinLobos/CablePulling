@@ -29,32 +29,29 @@ if 'trasa' not in st.session_state:
 def zastosuj_stylizacje_premium():
     st.markdown("""
     <style>
-     /* Celujemy WYŁĄCZNIE w przycisk boczny (Sidebar Toggle) */
-header[data-testid="stHeader"] button[aria-label="Open sidebar"],
-header[data-testid="stHeader"] button[data-testid="collapsedControl"] {
+     /* 1. Celujemy w przycisk boczny poprzez jego unikalną pozycję (zawsze pierwszy od lewej) */
+    header[data-testid="stHeader"] div:first-child > button {
     background-color: #ff0000 !important;
     color: white !important;
     border: 2px solid white !important;
     border-radius: 0 10px 10px 0 !important;
-    width: 45px !important;
-    height: 45px !important;
-    left: 0 !important;
-    position: fixed !important; /* To go 'przykuje' do krawędzi */
-    top: 5px !important;
-}
+    width: 48px !important;
+    height: 48px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    }
 
-/* Przywracamy standardowy wygląd dla reszty przycisków w nagłówku */
-header[data-testid="stHeader"] button:not([aria-label="Open sidebar"]):not([data-testid="collapsedControl"]) {
+    /* 2. WYMUSZAMY biały kolor ikony >> (szczególnie ważne w Dark Mode) */
+    header[data-testid="stHeader"] div:first-child > button svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    }
+
+    /* 3. Reset dla pozostałych buttonów w nagłówku, żeby nie były czerwone */
+    header[data-testid="stHeader"] div:not(:first-child) > button {
     background-color: transparent !important;
-    color: inherit !important;
     border: none !important;
-}
-
-/* Biała strzałka tylko dla sidebaru */
-header[data-testid="stHeader"] button[aria-label="Open sidebar"] svg,
-header[data-testid="stHeader"] button[data-testid="collapsedControl"] svg {
-    fill: white !important;
-}
+    }
 
     </style>""", unsafe_allow_html=True)
 
