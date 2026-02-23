@@ -2,89 +2,102 @@ import streamlit as st
 import pandas as pd
 import math
 
-# --- 1. KONFIGURACJA STRONY ---
+# =================================================================
+# 1. KONFIGURACJA STRONY I ŚRODOWISKA
+# =================================================================
 st.set_page_config(
-    page_title="Pull-Planner v4.4",
+    page_title="Pull-Planner v4.6 Professional",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- 2. INICJALIZACJA STANU SESJI ---
+# =================================================================
+# 2. INICJALIZACJA STANU SESJI (PAMIĘĆ SYSTEMU)
+# =================================================================
 if 'motyw' not in st.session_state:
     st.session_state.motyw = "Dark"
+
 if 'kable' not in st.session_state:
     st.session_state.kable = []
+
 if 'trasa' not in st.session_state:
     st.session_state.trasa = []
 
-# --- 3. KOMPLEKSOWY CSS (DARK MODE & UI FIXES) ---
-def zastosuj_stylizacje():
+# =================================================================
+# 3. KOMPLEKSOWY CSS (NAPRAWA DARK MODE DLA LIST I TABEL)
+# =================================================================
+def zastosuj_stylizacje_premium():
     if st.session_state.motyw == "Dark":
         st.markdown("""
             <style>
-            /* Główny kontener */
+            /* Główny kontener aplikacji */
             .stApp { 
                 background-color: #0e1117; 
                 color: #ffffff; 
             }
+            
+            /* Sidebar (Panel Boczny) */
             [data-testid="stSidebar"] { 
                 background-color: #1d2129; 
             }
             
-            /* Naprawa Selectbox (List Rozwijanych) */
+            /* Naprawa List Rozwijanych (Selectbox) - Tło i Tekst */
             div[data-baseweb="select"] > div {
                 background-color: #1d2129 !important;
                 color: #ffffff !important;
                 border: 1px solid #444 !important;
             }
+            
+            /* Naprawa Listy po otwarciu (Popover) */
             div[data-baseweb="popover"] ul {
                 background-color: #1d2129 !important;
                 color: #ffffff !important;
                 border: 1px solid #444 !important;
             }
-            div[data-baseweb="popover"] li {
-                color: #ffffff !important;
-            }
+            
+            /* Elementy listy przy najechaniu myszką */
             div[data-baseweb="popover"] li:hover {
                 background-color: #3d4452 !important;
             }
             
-            /* Stylizacja tabel */
+            /* Stylizacja tabel wyników */
             .stTable { 
                 border: 1px solid #444 !important; 
                 background-color: #1d2129; 
             }
+            
             .stTable td, .stTable th { 
                 border: 1px solid #555 !important; 
                 color: #ffffff !important;
-                padding: 10px !important;
+                padding: 12px !important;
             }
             
-            /* Teksty i etykiety */
+            /* Naprawa tekstów i etykiet */
             .stMarkdown, .stText, p, h1, h2, h3, span, label, li { 
                 color: #ffffff !important; 
             }
             
-            /* Metryki */
+            /* Metryki wyników (wyróżnienie kolorem) */
             div[data-testid="stMetricValue"] > div { 
                 color: #00ffcc !important; 
+            }
+            
+            /* Pola tekstowe i numeryczne */
+            div[data-baseweb="input"] {
+                background-color: #1d2129 !important;
+                color: white !important;
             }
             </style>
             """, unsafe_allow_html=True)
     else:
         st.markdown("""<style>.stApp { background-color: #ffffff; color: #000000; }</style>""", unsafe_allow_html=True)
 
-# --- 4. SŁOWNIK TŁUMACZEŃ (PEŁNY) ---
+# =================================================================
+# 4. SŁOWNIK TŁUMACZEŃ (PL / EN)
+# =================================================================
 TLUMACZENIA = {
     "PL": {
-        "tytul": "⚡ Profesjonalny Planer Naciągu Kabli (v4.4)",
-        "motyw": "Motyw wizualny:",
-        "naciag": "Naciąg",
-        "prosta": "Odcinek prosty",
-        "luk": "Łuk / Zakręt / Kolano",
-        "promien": "Promień gięcia R",
-        "bezpiecznie": "✅ WYNIK W NORMIE",
-        "alarm": "❌ PRZEKROCZONO LIMIT!",
+        "tytul": "⚡ Planer Naciągu Kabli 3D (v4.6)",
         "kable": "🔌 Konfiguracja Kabli",
         "trasa": "🛤️ Projekt Trasy",
         "oslona": "📏 Parametry Osłony",
@@ -92,187 +105,219 @@ TLUMACZENIA = {
         "o_kanal": "Kanał (Duct)",
         "analiza": "📊 Analiza Techniczna",
         "swp": "Nacisk boczny (SWP)",
-        "l_rzecz": "Długość rzeczywista",
-        "kat_wybor": "Kąt kształtki:",
-        "custom": "Własny kąt (wpisz...)",
-        "dodaj": "Dodaj element",
-        "wyczysc": "Wyczyść dane"
+        "l_rzecz": "Dł. rzeczywista",
+        "naciag": "Naciąg",
+        "prosta": "Odcinek prosty",
+        "luk": "Łuk / Kolano",
+        "plaszczyzna": "Płaszczyzna (kierunek):",
+        "poz": "Poziomo",
+        "dol": "Pionowo w dół (Dociąża)",
+        "gora": "Pionowo w górę (Odciąża)",
+        "dodaj": "Dodaj do projektu",
+        "wyczysc": "Wyczyść wszystko",
+        "limit": "Limit bezpieczeństwa"
     },
     "EN": {
-        "tytul": "⚡ Professional Cable Pull-Planner (v4.4)",
-        "motyw": "Visual Theme:",
-        "naciag": "Tension",
-        "prosta": "Straight section",
-        "luk": "Bend / Elbow",
-        "promien": "Bend Radius R",
-        "bezpiecznie": "✅ WITHIN LIMITS",
-        "alarm": "❌ LIMIT EXCEEDED!",
+        "tytul": "⚡ 3D Cable Pull-Planner (v4.6)",
         "kable": "🔌 Cable Configuration",
         "trasa": "🛤️ Route Design",
         "oslona": "📏 Conduit Parameters",
-        "o_rura": "Round Conduit",
+        "o_rura": "Round Pipe",
         "o_kanal": "Rectangular Duct",
         "analiza": "📊 Technical Analysis",
         "swp": "Sidewall Pressure (SWP)",
         "l_rzecz": "Real Length",
-        "kat_wybor": "Select elbow angle:",
-        "custom": "Custom angle (type...)",
-        "dodaj": "Add element",
-        "wyczysc": "Clear data"
+        "naciag": "Tension",
+        "prosta": "Straight section",
+        "luk": "Bend / Elbow",
+        "plaszczyzna": "Plane (Direction):",
+        "poz": "Horizontal",
+        "dol": "Vertical Down (Added load)",
+        "gora": "Vertical Up (Lightened)",
+        "dodaj": "Add to project",
+        "wyczysc": "Clear all",
+        "limit": "Safety limit"
     }
 }
 
-# --- 5. SIDEBAR (USTAWIENIA) ---
+# =================================================================
+# 5. PANEL BOCZNY (SIDEBAR) - WEJŚCIE DANYCH
+# =================================================================
 with st.sidebar:
-    lang = st.radio("Language / Język:", ["PL", "EN"], horizontal=True)
-    t = TLUMACZENIA[lang]
+    # Wybór języka
+    jezyk_wybor = st.radio("Język / Language:", ["PL", "EN"], horizontal=True)
+    txt = TLUMACZENIA[jezyk_wybor]
+    
     st.divider()
     
+    # Przełącznik motywu
     st.session_state.motyw = st.select_slider(
-        t["motyw"], 
+        "Motyw:", 
         options=["Light", "Dark"], 
         value=st.session_state.motyw
     )
-    zastosuj_stylizacje()
+    zastosuj_stylizacje_premium()
     
-    st.header("System jednostek")
-    u_sys = st.radio("", ["Metric (N)", "Metric (kN)", "USA (lb)"])
-    if "kN" in u_sys:
-        j_sila, m_N, m_ekr, g, u_len = "kN", 1000.0, 0.001, 9.81, "m"
-    elif "lb" in u_sys:
-        j_sila, m_N, m_ekr, g, u_len = "lb", 1.0, 1.0, 1.0, "ft"
+    # Wybór jednostek
+    st.header("Jednostki")
+    sys_miar = st.radio("", ["Metric (N)", "Metric (kN)", "USA (lb)"])
+    if "kN" in sys_miar:
+        j_sila, m_N, m_ekran, g, u_dl = "kN", 1000.0, 0.001, 9.81, "m"
+    elif "lb" in sys_miar:
+        j_sila, m_N, m_ekran, g, u_dl = "lb", 1.0, 1.0, 1.0, "ft"
     else:
-        j_sila, m_N, m_ekr, g, u_len = "N", 1.0, 1.0, 9.81, "m"
+        j_sila, m_N, m_ekran, g, u_dl = "N", 1.0, 1.0, 9.81, "m"
 
-    st.header(t["oslona"])
-    typ_o = st.radio("Typ osłony:", [t["o_rura"], t["o_kanal"]])
-    if typ_o == t["o_rura"]:
-        D_in = st.number_input("Średnica wewn. D (mm)", value=100.0)
-        H_in = D_in
-    else:
-        W_in = st.number_input("Szerokość W (mm)", value=200.0)
-        H_in = st.number_input("Wysokość H (mm)", value=100.0)
-        D_in = 999.0
-
-    st.header(t["kable"])
-    c_diam = st.number_input("Średnica kabla (mm)", value=30.0)
-    c_weight = st.number_input(f"Waga kabla ({u_len})", value=1.0)
+    # Parametry osłony
+    st.header(txt["oslona"])
+    typ_oslony = st.radio("Typ:", [txt["o_rura"], txt["o_kanal"]])
+    D_wewn = st.number_input("Średnica wewn. (mm)", value=100.0)
+    if typ_oslony == txt["o_kanal"]:
+        W_wewn = st.number_input("Szerokość (mm)", value=200.0)
     
-    if st.button(f"➕ {t['dodaj']} kabel"):
-        st.session_state.kable.append({"d": c_diam, "w": c_weight})
+    # Dodawanie kabli
+    st.header(txt["kable"])
+    c_d = st.number_input("Średnica d (mm)", value=30.0)
+    c_w = st.number_input(f"Waga ({u_dl})", value=1.0)
+    
+    if st.button(f"➕ {txt['dodaj']} kabel"):
+        st.session_state.kable.append({"d": c_d, "w": c_w})
     
     if st.session_state.kable:
         st.table(pd.DataFrame(st.session_state.kable))
-        if st.button(f"🗑️ {t['wyczysc']} kable"):
+        if st.button("🗑️ Usuń kable"):
             st.session_state.kable = []
             st.rerun()
 
+    # Współczynniki tarcia i limity
     st.divider()
-    mu_val = st.slider("Współczynnik tarcia (μ)", 0.1, 0.6, 0.35)
-    t_drum = st.number_input(f"Naciąg bębna ({j_sila})", value=0.0)
-    lim_val = st.number_input(f"Limit ({j_sila})", value=5000.0 if "N" == j_sila else 10.0)
-    limit_N = lim_val * m_N
+    mu_f = st.slider("Wsp. tarcia (μ)", 0.1, 0.6, 0.35)
+    t_start = st.number_input(f"Naciąg pocz. ({j_sila})", value=0.0)
+    t_limit = st.number_input(f"Limit ({j_sila})", value=10.0 if "kN" in j_sila else 5000.0)
 
-# --- 6. PANEL ANALIZY ---
-st.title(t["tytul"])
+# =================================================================
+# 6. PANEL GŁÓWNY - ANALIZA I PROJEKT
+# =================================================================
+st.title(txt["tytul"])
+
+# Obliczenia pomocnicze (WC Factor i Jam Ratio)
 wc_factor = 1.0
-
 if st.session_state.kable:
-    st.subheader(t["analiza"])
-    max_d_cab = max([k['d'] for k in st.session_state.kable])
-    jam_r = D_in / max_d_cab
+    st.subheader(txt["analiza"])
+    max_d_kabla = max([k['d'] for k in st.session_state.kable])
+    jam_r = D_wewn / max_d_kabla
     
-    if typ_o == t["o_rura"] and len(st.session_state.kable) >= 3:
-        wc_factor = 1 + (4/3) * (1 / ((D_in / max_d_cab) - 1))**2
+    # Wzór na Weight Correction Factor (dla 3+ kabli w rurze)
+    if typ_oslony == txt["o_rura"] and len(st.session_state.kable) >= 3:
+        wc_factor = 1 + (4/3) * (1 / ((D_wewn / max_d_kabla) - 1))**2
     
-    ma, mb, mc = st.columns(3)
-    ma.metric("Jam Ratio", round(jam_r, 2))
-    mb.metric("Clearance", f"{round(H_in - max_d_cab, 1)} mm")
-    mc.metric("WC Factor", round(wc_factor, 3))
-    
-    if typ_o == t["o_rura"] and 2.8 <= jam_r <= 3.2:
-        st.error("🚨 UWAGA: Ryzyko zaklinowania kabli (Jam Ratio ok. 3.0)!")
+    col_a, col_b, col_c = st.columns(3)
+    col_a.metric("Jam Ratio", round(jam_r, 2))
+    col_b.metric("Weight Factor", round(wc_factor, 3))
+    col_b.metric("Clearance", f"{round(D_wewn - max_d_kabla, 1)} mm")
 
-# --- 7. PROJEKT TRASY ---
-st.subheader(t["trasa"])
+# Dodawanie elementów trasy
+st.subheader(txt["trasa"])
 r1, r2, r3 = st.columns([2, 3, 3])
 
 with r1:
-    v_type = st.selectbox("Element", [t["prosta"], t["luk"]])
-    t_id = "straight" if v_type == t["prosta"] else "bend"
+    typ_el = st.selectbox("Element", [txt["prosta"], txt["luk"]])
+    t_id = "straight" if typ_el == txt["prosta"] else "bend"
 
 with r2:
     if t_id == "straight":
-        v_len_angle = st.number_input(f"Długość ({u_len})", value=10.0)
+        v_size = st.number_input(f"Długość ({u_dl})", value=10.0)
+        v_dir = txt["poz"]
     else:
-        opcje_lego = ["15°", "30°", "45°", "60°", "90°", t["custom"]]
-        v_choice = st.selectbox(t["kat_wybor"], opcje_lego, index=4)
-        if v_choice == t["custom"]:
-            v_len_angle = st.number_input("Kąt (stopnie °)", value=22.5)
+        v_size = st.selectbox("Kąt kształtki", ["15°", "30°", "45°", "60°", "90°", "Inny"])
+        if v_size == "Inny":
+            v_size = st.number_input("Wpisz kąt (°)", value=22.5)
         else:
-            v_len_angle = float(v_choice.replace("°", ""))
+            v_size = float(v_size.replace("°", ""))
+        v_dir = st.selectbox(txt["plaszczyzna"], [txt["poz"], txt["dol"], txt["gora"]])
 
 with r3:
     if t_id == "straight":
-        n_unit = st.radio("Nachylenie:", ["%", "°"], horizontal=True)
-        n_val = st.number_input("Wartość", value=0.0)
+        nach_val = st.number_input("Nachylenie (%)", value=0.0)
         r_bend = 0.0
     else:
-        r_bend = st.number_input(f"{t['promien']} ({u_len})", value=1.0)
-        n_val, n_unit = 0.0, "%"
+        r_bend = st.number_input(f"Promień R ({u_dl})", value=1.0)
+        nach_val = 0.0
 
-if st.button(f"➕ {t['dodaj']} element"):
+if st.button(f"➕ {txt['dodaj']} element trasy"):
     st.session_state.trasa.append({
         "id": t_id, 
-        "val": v_len_angle, 
-        "slope": n_val, 
-        "sl_mode": n_unit, 
-        "r": r_bend
+        "val": v_size, 
+        "slope": nach_val, 
+        "r": r_bend, 
+        "plane": v_dir
     })
 
-# --- 8. OBLICZENIA I TABELA ---
+# =================================================================
+# 7. OBLICZENIA KOŃCOWE (SILNIK FIZYCZNY)
+# =================================================================
 if st.session_state.trasa:
-    naciag_N = t_drum * m_N
-    w_total = sum([k['w'] for k in st.session_state.kable]) if st.session_state.kable else 0.0
-    sum_L = 0.0
-    tablica_wynikowa = []
+    naciag_N = t_start * m_N
+    suma_wag = sum([k['w'] for k in st.session_state.kable])
+    suma_L = 0.0
+    tabela_wynikow = []
 
-    for i, step in enumerate(st.session_state.trasa):
-        if step["id"] == "straight":
-            # Formuła dla odcinka prostego
-            rad_slope = math.radians(step["slope"]) if step["sl_mode"] == "°" else math.atan(step['slope']/100)
-            naciag_N += step["val"] * w_total * g * (mu_val * wc_factor * math.cos(rad_slope) + math.sin(rad_slope))
-            real_L, swp_val, d_name = step["val"], 0.0, t["prosta"]
+    for i, krok in enumerate(st.session_state.trasa):
+        if krok["id"] == "straight":
+            # Odcinek prosty (uwzględnia kąt nachylenia)
+            theta = math.atan(krok["slope"] / 100)
+            naciag_N += krok["val"] * suma_wag * g * (mu_f * wc_factor * math.cos(theta) + math.sin(theta))
+            d_rzecz, swp_val, opis = krok["val"], 0.0, txt["prosta"]
         else:
-            # Formuła dla łuku
-            rad_bend = math.radians(step["val"])
-            naciag_N *= math.exp(mu_val * wc_factor * rad_bend)
-            swp_val = (naciag_N / step["r"]) if step["r"] > 0 else 0.0
-            real_L, d_name = (rad_bend * step["r"]), f"{t['luk']} ({step['val']}°)"
-        
+            # Łuk (uwzględnia płaszczyznę gięcia)
+            phi = math.radians(krok["val"])
+            
+            # Siła dociągu grawitacyjnego (waga efektywna)
+            if krok["plane"] == txt["dol"]:
+                # Kabel dociśnięty przez grawitację
+                w_eff = math.sqrt((naciag_N/krok["r"])**2 + (suma_wag*g*math.cos(phi))**2) + (suma_wag*g*math.sin(phi))
+                naciag_N += mu_f * wc_factor * w_eff * (krok["r"] * phi)
+            elif krok["plane"] == txt["gora"]:
+                # Kabel podrywany przez grawitację
+                w_eff = math.sqrt((naciag_N/krok["r"])**2 + (suma_wag*g*math.cos(phi))**2) - (suma_wag*g*math.sin(phi))
+                naciag_N += mu_f * wc_factor * w_eff * (krok["r"] * phi)
+            else:
+                # Standardowy łuk poziomy (Capstan Equation)
+                naciag_N *= math.exp(mu_f * wc_factor * phi)
+            
+            d_rzecz = phi * krok["r"]
+            swp_val = naciag_N / krok["r"] if krok["r"] > 0 else 0.0
+            opis = f"{txt['luk']} {krok['val']}° ({krok['plane']})"
+
         naciag_N = max(0, naciag_N)
-        sum_L += real_L
+        suma_L += d_rzecz
         
-        tablica_wynikowa.append({
+        tabela_wynikow.append({
             "#": i+1,
-            "Typ": d_name,
-            t["l_rzecz"]: f"{round(real_L, 2)} {u_len}",
-            f"{t['naciag']} [{j_sila}]": round(naciag_N * m_ekr, 3),
-            f"SWP [{j_sila}/{u_len}]": round(swp_val * m_ekr, 2)
+            "Typ": opis,
+            txt["l_rzecz"]: f"{round(d_rzecz, 2)} {u_dl}",
+            f"{txt['naciag']} [{j_sila}]": round(naciag_N * m_ekran, 3),
+            f"SWP [{j_sila}/{u_dl}]": round(swp_val * m_ekran, 2)
         })
 
-    st.table(pd.DataFrame(tablica_wynikowa))
+    # Wyświetlanie wyników
+    st.table(pd.DataFrame(tabela_wynikow))
     st.divider()
     
-    f1, f2 = st.columns(2)
-    f1.metric("Całkowita długość", f"{round(sum_L, 2)} {u_len}")
-    f2.metric("Naciąg końcowy", f"{round(naciag_N * m_ekr, 2)} {j_sila}")
+    col1, col2 = st.columns(2)
+    col1.metric("Długość trasy", f"{round(suma_L, 2)} {u_dl}")
+    col2.metric("Naciąg końcowy", f"{round(naciag_N * m_ekoran, 2)} {j_sila}")
 
-    if naciag_N > limit_N:
-        st.error(t["alarm"])
+    if naciag_N > (t_limit * m_N):
+        st.error(txt["alarm"])
     else:
-        st.success(t["bezpiecznie"])
+        st.success("✅ Naciąg w dopuszczalnej normie.")
 
-    if st.button(f"🗑️ {t['wyczysc']} trasę"):
+    if st.button("🗑️ Wyczyść projekt trasy"):
         st.session_state.trasa = []
         st.rerun()
+
+# =================================================================
+# 8. STOPKA SYSTEMOWA
+# =================================================================
+st.caption(f"Mike-OS v4.6 Ready. System state: Stable. Gravity engine: Active.")
