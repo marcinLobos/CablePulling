@@ -87,6 +87,21 @@ def zastosuj_stylizacje_premium():
                 background-color: #1d2129 !important;
                 color: white !important;
             }
+            /* Naprawa widoczności tekstu na przyciskach w Dark Mode */
+            div.stButton > button {
+                background-color: #3d4452 !important;
+                color: #ffffff !important;
+                border: 1px solid #00ffcc !important;
+                transition: all 0.3s ease;
+            }
+
+            div.stButton > button:hover {
+                background-color: #00ffcc !important;
+                color: #0e1117 !important;
+                border: 1px solid #ffffff !important;
+            }
+
+
             </style>
             """, unsafe_allow_html=True)
     else:
