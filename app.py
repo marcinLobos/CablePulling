@@ -5,7 +5,7 @@ import math
 # --- KONFIGURACJA STRONY ---
 st.set_page_config(page_title="Pull-Planner Max Pro", layout="wide")
 
-# --- FUNKCJA DARK MODE (Wstrzykiwanie CSS) ---
+# --- FUNKCJA DARK MODE (CSS) ---
 def zastosuj_motyw(wybrany_motyw):
     if wybrany_motyw == "Dark":
         st.markdown("""
@@ -22,7 +22,7 @@ def zastosuj_motyw(wybrany_motyw):
             </style>
             """, unsafe_allow_html=True)
 
-# --- SŁOWNIK JĘZYKOWY (Poprawione Tytuły) ---
+# --- SŁOWNIK JĘZYKOWY ---
 TLUMACZENIA = {
     "PL": {
         "tytul": "⚡ Planer Przeciągania Kabli - Wersja Profesjonalna",
@@ -37,7 +37,8 @@ TLUMACZENIA = {
         "kable": "🔌 Kable w kanale",
         "trasa": "🛤️ Planowanie Trasy",
         "dodaj": "Dodaj",
-        "wyczysc": "Wyczyść wszystko"
+        "wyczysc": "Wyczyść",
+        "tarcie": "Współczynnik tarcia (μ)"
     },
     "EN": {
         "tytul": "⚡ Professional Cable Pull-Planner Pro",
@@ -52,11 +53,12 @@ TLUMACZENIA = {
         "kable": "🔌 Cable list",
         "trasa": "🛤️ Route Planning",
         "dodaj": "Add",
-        "wyczysc": "Clear all"
+        "wyczysc": "Clear",
+        "tarcie": "Friction coefficient (μ)"
     }
 }
 
-# --- SIDEBAR (Ustawienia) ---
+# --- SIDEBAR ---
 with st.sidebar:
     wybrany_jezyk = st.radio("Język / Language:", ["PL", "EN"], horizontal=True)
     txt = TLUMACZENIA[wybrany_jezyk]
@@ -68,7 +70,6 @@ with st.sidebar:
     st.header("⚙️ Ustawienia")
     wybrany_system = st.radio(txt["jednostki"], ["Metric (N)", "Metric (kN)", "USA (lb)"])
     
-    # Logika jednostek i grawitacji g
     if "kN" in wybrany_system:
         jednostka = "kN"; m_na_N = 1000.0; m_ekran = 0.001; g = 9.81
     elif "lb" in wybrany_system:
@@ -76,6 +77,9 @@ with st.sidebar:
     else:
         jednostka = "N"; m_na_N = 1.0; m_ekran = 1.0; g = 9.81
 
+    # PRZYWRÓCONY SUWAK TARCIA
+    mu = st.slider(txt["tarcie"], 0.1, 0.6, 0.35)
+    
     limit_uzytkownika = st.number_input(f"Limit ({jednostka})", value=10.0 if jednostka=="kN" else 5000.0)
     limit_N = limit_uzytkownika * m_na_N
 
@@ -83,10 +87,16 @@ with st.sidebar:
     if 'kable' not in st.session_state: st.session_state.kable = []
     c_d = st.number_input("Średnica (mm/in)", value=30.0)
     c_w = st.number_input("Waga (kg/m / lb/ft)", value=1.5)
+    
     if st.button(f"➕ {txt['dodaj']} kabel"):
         st.session_state.kable.append({"d": c_d, "w": c_w})
-    if st.session_state.kable and st.button(f"🗑️ {txt['wyczysc']} (kable)"):
-        st.session_state.kable = []
+    
+    # PRZYWRÓCONA WIDOCZNA LISTA KABLI
+    if st.session_state.kable:
+        st.table(pd.DataFrame(st.session_state.kable))
+        if st.button(f"🗑️ {txt['wyczysc']} (kable)"):
+            st.session_state.kable = []
+            st.rerun()
 
 # --- INTERFEJS GŁÓWNY ---
 st.title(txt["tytul"])
@@ -114,8 +124,8 @@ if st.button(f"➕ {txt['dodaj']} odcinek"):
 # --- OBLICZENIA I TABELA ---
 if st.session_state.trasa:
     naciag_N = 0.0
-    waga_total = sum([k['w'] for k in st.session_state.kable]) if st.session_state.kable else 1.5
-    mu, wc = 0.35, 1.0
+    waga_total = sum([k['w'] for k in st.session_state.kable]) if st.session_state.kable else 0.0
+    wc = 1.0 # Współczynnik korekcji wagi (weight correction)
     
     wyniki_tabela = []
     for i, s in enumerate(st.session_state.trasa):
@@ -143,3 +153,4 @@ if st.session_state.trasa:
 
     if st.button(f"🗑️ {txt['wyczysc']} (trasa)"):
         st.session_state.trasa = []
+        st.rerun()
