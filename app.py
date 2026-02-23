@@ -29,37 +29,32 @@ if 'trasa' not in st.session_state:
 def zastosuj_stylizacje_premium():
     st.markdown("""
     <style>
+        /* 1. Celujemy we wszystko, co może być tym przyciskiem */
+        [data-testid="stHeader"] button, 
+        [data-testid="collapsedControl"],
+        .st-emotion-cache-6qob1r { 
+        background-color: #ff0000 !important;
+        color: white !important;
+        }
 
-   /* 1. Celujemy przez główny kontener (bardzo silne) */
-    .stApp header[data-testid="stHeader"] button[data-testid="collapsedControl"],
-    .stApp [data-testid="collapsedControl"],
-    button[aria-label="Open sidebar"] {
-    background-color: #ff0000 !important;
-    color: #ffffff !important;
-    border: 3px solid #ffffff !important; /* Jeszcze grubsza ramka */
-    border-radius: 0 12px 12px 0 !important;
-    width: 55px !important;
-    height: 55px !important;
-    display: flex !important;
-    opacity: 1 !important;
-    left: 0 !important;
-    z-index: 1000001 !important;
-    }
+        /* 2. WYMUSZAMY czerwień na ikonie (svg) i kontenerze */
+            header[data-testid="stHeader"] [data-testid="collapsedControl"] {
+            background-color: #ff0000 !important;
+            border: 2px solid white !important;
+            border-radius: 5px !important;
+            height: 40px !important;
+            width: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
 
-    /* 2. Wymuszamy kolor samej ikonki (strzałek >>) */
-    [data-testid="collapsedControl"] svg {
-    fill: #ffffff !important;
-    color: #ffffff !important;
-    width: 35px !important;
-    height: 35px !important;
-    }
+        /* 3. Kolor samej strzałki >> */
+            header[data-testid="stHeader"] [data-testid="collapsedControl"] svg {
+            fill: white !important;
+            color: white !important;
+        }
 
-    /* 3. Naprawa 'ducha' - żeby tło nie znikało po kliknięciu */
-    [data-testid="collapsedControl"]:focus, 
-    [data-testid="collapsedControl"]:active {
-    background-color: #ff0000 !important;
-    outline: none !important;
-    }
 
     </style>""", unsafe_allow_html=True)
 
