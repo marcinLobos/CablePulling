@@ -114,11 +114,30 @@ def zastosuj_stylizacje_premium():
             background-color: rgba(0, 255, 204, 0.1) !important;
             border-radius: 0 10px 10px 0 !important;
             }
+            /* Strzałka bocznego panelu w Dark Mode */
+            section[data-testid="stSidebar"] + div button[data-testid="collapsedControl"] {
+            color: #00ffcc !important; 
+            background-color: #1d2129 !important;
+            border: 1px solid #00ffcc !important;
+            border-radius: 0 10px 10px 0 !important;
+            left: 0 !important;
+}
 
-            </style>
-            """, unsafe_allow_html=True)
+            </style>""", unsafe_allow_html=True)
     else:
-        st.markdown("""<style>.stApp { background-color: #ffffff; color: #000000; }</style>""", unsafe_allow_html=True)
+        st.markdown("""
+        <style>
+        .stApp { background-color: #ffffff; color: #000000; }
+        
+        /* Strzałka bocznego panelu w Light Mode */
+        section[data-testid="stSidebar"] + div button[data-testid="collapsedControl"] {
+        color: #ffffff !important; 
+        background-color: #0e1117 !important; /* Ciemne tło przycisku na białym tle apki */
+        border: 1px solid #444444 !important;
+        border-radius: 0 10px 10px 0 !important;
+        }
+        
+        </style>""", unsafe_allow_html=True)
 
 # =================================================================
 # 4. SŁOWNIK TŁUMACZEŃ (PL / EN)
