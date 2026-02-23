@@ -104,10 +104,16 @@ def zastosuj_stylizacje_premium():
             }
 
             /* Fix dla napisu, o który pytałeś - wymuszenie widoczności */
-            div.stButton > button p {
-                color: #ffffff !important;
-}
+             div.stButton > button p {
+            color: #ffffff !important;
+            }
 
+
+            [data-testid="collapsedControl"] {
+            color: #00ffcc !important;
+            background-color: rgba(0, 255, 204, 0.1) !important;
+            border-radius: 0 10px 10px 0 !important;
+            }
 
             </style>
             """, unsafe_allow_html=True)
