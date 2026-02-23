@@ -27,131 +27,130 @@ if 'trasa' not in st.session_state:
 # 3. KOMPLEKSOWY CSS (NAPRAWA DARK MODE DLA LIST I TABEL)
 # =================================================================
 def zastosuj_stylizacje_premium():
+    st.markdown("""
+    <style>
+        /* Przycisk otwierania panelu - WIDOCZNY ZAWSZE (Red Alert Style) */
+        button[data-testid="collapsedControl"] {
+        background-color: #ff0000 !important; /* Czysta czerwień */
+        color: #ffffff !important;           /* Biała strzałka */
+        border: 2px solid #ffffff !important; /* Biała ramka dla kontrastu */
+        border-radius: 0 10px 10px 0 !important;
+        width: 50px !important;
+        height: 50px !important;
+        left: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 999999 !important;
+    }
 
-st.markdown("""
-<style>
-    /* Przycisk otwierania panelu - WIDOCZNY ZAWSZE (Red Alert Style) */
-    button[data-testid="collapsedControl"] {
-    background-color: #ff0000 !important; /* Czysta czerwień */
-    color: #ffffff !important;           /* Biała strzałka */
-    border: 2px solid #ffffff !important; /* Biała ramka dla kontrastu */
-    border-radius: 0 10px 10px 0 !important;
-    width: 50px !important;
-    height: 50px !important;
-    left: 0 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    z-index: 999999 !important;
-}
+        /* Żeby strzałka w środku też była biała */
+        button[data-testid="collapsedControl"] svg {
+        fill: #ffffff !important;
+        stroke: #ffffff !important;
+        width: 30px !important;
+        height: 30px !important;
+    }
 
-    /* Żeby strzałka w środku też była biała */
-    button[data-testid="collapsedControl"] svg {
-    fill: #ffffff !important;
-    stroke: #ffffff !important;
-    width: 30px !important;
-    height: 30px !important;
-}
-
-    /* Efekt po najechaniu - lekka zmiana odcienia */
-    button[data-testid="collapsedControl"]:hover {
-    background-color: #cc0000 !important;
-    border-color: #00ffcc !important; /* Twój morski akcent przy najechaniu */
-}
-</style>""", unsafe_allow_html=True)
+        /* Efekt po najechaniu - lekka zmiana odcienia */
+        button[data-testid="collapsedControl"]:hover {
+        background-color: #cc0000 !important;
+        border-color: #00ffcc !important; /* Twój morski akcent przy najechaniu */
+    }
+    </style>""", unsafe_allow_html=True)
 
 
-# Tutaj jest podzial stylowania na Dark i Light side.
+    # Tutaj jest podzial stylowania na Dark i Light side.
 
-    if st.session_state.motyw == "Dark":
-        st.markdown("""
+        if st.session_state.motyw == "Dark":
+            st.markdown("""
+                <style>
+                /* Główny kontener aplikacji */
+                .stApp { 
+                    background-color: #0e1117; 
+                    color: #ffffff; 
+                }
+                
+                /* Sidebar (Panel Boczny) */
+                [data-testid="stSidebar"] { 
+                    background-color: #1d2129; 
+                }
+                
+                /* Naprawa List Rozwijanych (Selectbox) - Tło i Tekst */
+                div[data-baseweb="select"] > div {
+                    background-color: #1d2129 !important;
+                    color: #ffffff !important;
+                    border: 1px solid #444 !important;
+                }
+                
+                /* Naprawa Listy po otwarciu (Popover) */
+                div[data-baseweb="popover"] ul {
+                    background-color: #1d2129 !important;
+                    color: #ffffff !important;
+                    border: 1px solid #444 !important;
+                }
+                
+                /* Elementy listy przy najechaniu myszką */
+                div[data-baseweb="popover"] li:hover {
+                    background-color: #3d4452 !important;
+                }
+                
+                /* Stylizacja tabel wyników */
+                .stTable { 
+                    border: 1px solid #444 !important; 
+                    background-color: #1d2129; 
+                }
+                
+                .stTable td, .stTable th { 
+                    border: 1px solid #555 !important; 
+                    color: #ffffff !important;
+                    padding: 12px !important;
+                }
+                
+                /* Naprawa tekstów i etykiet */
+                .stMarkdown, .stText, p, h1, h2, h3, span, label, li { 
+                    color: #ffffff !important; 
+                }
+                
+                /* Metryki wyników (wyróżnienie kolorem) */
+                div[data-testid="stMetricValue"] > div { 
+                    color: #00ffcc !important; 
+                }
+                
+                /* Pola tekstowe i numeryczne */
+                div[data-baseweb="input"] {
+                    background-color: #1d2129 !important;
+                    color: white !important;
+                }
+                /* Naprawa widoczności tekstu na przyciskach w Dark Mode */
+            div.stButton > button {
+                background-color: #1d2129 !important; /* Tło takie jak sidebar */
+                color: #ffffff !important;           /* Zawsze biały tekst */
+                border: 1px solid #444444 !important; /* Dyskretna ramka */
+                border-radius: 4px;
+                transition: all 0.2s ease-in-out;
+            }
+
+                div.stButton > button:hover {
+                    background-color: #2c313c !important; /* Delikatne rozjaśnienie przy najechaniu */
+                    color: #00ffcc !important;           /* Tylko tekst dostaje akcent morski */
+                    border: 1px solid #00ffcc !important; /* Cienka morska obwoluta */
+                    box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.2); /* Subtelna poświata zamiast jaskrawości */
+                }
+
+                /* Fix dla napisu, o który pytałeś - wymuszenie widoczności */
+                div.stButton > button p {
+                color: #ffffff !important;
+                }
+
+                </style>""", unsafe_allow_html=True)
+        else:
+            st.markdown("""
             <style>
-            /* Główny kontener aplikacji */
-            .stApp { 
-                background-color: #0e1117; 
-                color: #ffffff; 
-            }
+            .stApp { background-color: #ffffff; color: #000000; }
             
-            /* Sidebar (Panel Boczny) */
-            [data-testid="stSidebar"] { 
-                background-color: #1d2129; 
-            }
+        
             
-            /* Naprawa List Rozwijanych (Selectbox) - Tło i Tekst */
-            div[data-baseweb="select"] > div {
-                background-color: #1d2129 !important;
-                color: #ffffff !important;
-                border: 1px solid #444 !important;
-            }
-            
-            /* Naprawa Listy po otwarciu (Popover) */
-            div[data-baseweb="popover"] ul {
-                background-color: #1d2129 !important;
-                color: #ffffff !important;
-                border: 1px solid #444 !important;
-            }
-            
-            /* Elementy listy przy najechaniu myszką */
-            div[data-baseweb="popover"] li:hover {
-                background-color: #3d4452 !important;
-            }
-            
-            /* Stylizacja tabel wyników */
-            .stTable { 
-                border: 1px solid #444 !important; 
-                background-color: #1d2129; 
-            }
-            
-            .stTable td, .stTable th { 
-                border: 1px solid #555 !important; 
-                color: #ffffff !important;
-                padding: 12px !important;
-            }
-            
-            /* Naprawa tekstów i etykiet */
-            .stMarkdown, .stText, p, h1, h2, h3, span, label, li { 
-                color: #ffffff !important; 
-            }
-            
-            /* Metryki wyników (wyróżnienie kolorem) */
-            div[data-testid="stMetricValue"] > div { 
-                color: #00ffcc !important; 
-            }
-            
-            /* Pola tekstowe i numeryczne */
-            div[data-baseweb="input"] {
-                background-color: #1d2129 !important;
-                color: white !important;
-            }
-            /* Naprawa widoczności tekstu na przyciskach w Dark Mode */
-          div.stButton > button {
-            background-color: #1d2129 !important; /* Tło takie jak sidebar */
-            color: #ffffff !important;           /* Zawsze biały tekst */
-            border: 1px solid #444444 !important; /* Dyskretna ramka */
-            border-radius: 4px;
-            transition: all 0.2s ease-in-out;
-        }
-
-            div.stButton > button:hover {
-                background-color: #2c313c !important; /* Delikatne rozjaśnienie przy najechaniu */
-                color: #00ffcc !important;           /* Tylko tekst dostaje akcent morski */
-                border: 1px solid #00ffcc !important; /* Cienka morska obwoluta */
-                box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.2); /* Subtelna poświata zamiast jaskrawości */
-            }
-
-            /* Fix dla napisu, o który pytałeś - wymuszenie widoczności */
-             div.stButton > button p {
-            color: #ffffff !important;
-            }
-
             </style>""", unsafe_allow_html=True)
-    else:
-        st.markdown("""
-        <style>
-        .stApp { background-color: #ffffff; color: #000000; }
-        
-    
-        
-        </style>""", unsafe_allow_html=True)
 
 # =================================================================
 # 4. SŁOWNIK TŁUMACZEŃ (PL / EN)
