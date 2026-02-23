@@ -105,4 +105,4 @@ if st.session_state.route:
     st.table(pd.DataFrame(results))
     if current_t > max_t: st.error(f"❌ ALARM: {round(current_t, 2)} {u_force} > {max_t}")
     else: st.success(f"✅ Wynik: {round(current_t, 2)} {u_force}")
-    if st.button("🗑️ Wyczyść trasę"):
+    if st.button("🗑️ Wyczyść trasę"): st.session_state.route = []
