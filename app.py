@@ -88,18 +88,25 @@ def zastosuj_stylizacje_premium():
                 color: white !important;
             }
             /* Naprawa widoczności tekstu na przyciskach w Dark Mode */
-            div.stButton > button {
-                background-color: #3d4452 !important;
-                color: #ffffff !important;
-                border: 1px solid #00ffcc !important;
-                transition: all 0.3s ease;
-            }
+          div.stButton > button {
+            background-color: #1d2129 !important; /* Tło takie jak sidebar */
+            color: #ffffff !important;           /* Zawsze biały tekst */
+            border: 1px solid #444444 !important; /* Dyskretna ramka */
+            border-radius: 4px;
+            transition: all 0.2s ease-in-out;
+        }
 
             div.stButton > button:hover {
-                background-color: #00ffcc !important;
-                color: #0e1117 !important;
-                border: 1px solid #ffffff !important;
+                background-color: #2c313c !important; /* Delikatne rozjaśnienie przy najechaniu */
+                color: #00ffcc !important;           /* Tylko tekst dostaje akcent morski */
+                border: 1px solid #00ffcc !important; /* Cienka morska obwoluta */
+                box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.2); /* Subtelna poświata zamiast jaskrawości */
             }
+
+            /* Fix dla napisu, o który pytałeś - wymuszenie widoczności */
+            div.stButton > button p {
+                color: #ffffff !important;
+}
 
 
             </style>
