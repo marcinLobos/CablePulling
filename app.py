@@ -306,7 +306,7 @@ if st.session_state.trasa:
     
     col1, col2 = st.columns(2)
     col1.metric("Długość trasy", f"{round(suma_L, 2)} {u_dl}")
-    col2.metric("Naciąg końcowy", f"{round(naciag_N * m_ekoran, 2)} {j_sila}")
+    col2.metric("Naciąg końcowy", f"{round(naciag_N * m_ekran, 2)} {j_sila}")
 
     if naciag_N > (t_limit * m_N):
         st.error(txt["alarm"])
