@@ -29,32 +29,32 @@ if 'trasa' not in st.session_state:
 def zastosuj_stylizacje_premium():
     st.markdown("""
     <style>
-        /* 1. Celujemy we wszystko, co może być tym przyciskiem */
-        [data-testid="stHeader"] button, 
-        [data-testid="collapsedControl"],
-        .st-emotion-cache-6qob1r { 
-        background-color: #ff0000 !important;
-        color: white !important;
-        }
+     /* Celujemy WYŁĄCZNIE w przycisk boczny (Sidebar Toggle) */
+header[data-testid="stHeader"] button[aria-label="Open sidebar"],
+header[data-testid="stHeader"] button[data-testid="collapsedControl"] {
+    background-color: #ff0000 !important;
+    color: white !important;
+    border: 2px solid white !important;
+    border-radius: 0 10px 10px 0 !important;
+    width: 45px !important;
+    height: 45px !important;
+    left: 0 !important;
+    position: fixed !important; /* To go 'przykuje' do krawędzi */
+    top: 5px !important;
+}
 
-        /* 2. WYMUSZAMY czerwień na ikonie (svg) i kontenerze */
-            header[data-testid="stHeader"] [data-testid="collapsedControl"] {
-            background-color: #ff0000 !important;
-            border: 2px solid white !important;
-            border-radius: 5px !important;
-            height: 40px !important;
-            width: 40px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
+/* Przywracamy standardowy wygląd dla reszty przycisków w nagłówku */
+header[data-testid="stHeader"] button:not([aria-label="Open sidebar"]):not([data-testid="collapsedControl"]) {
+    background-color: transparent !important;
+    color: inherit !important;
+    border: none !important;
+}
 
-        /* 3. Kolor samej strzałki >> */
-            header[data-testid="stHeader"] [data-testid="collapsedControl"] svg {
-            fill: white !important;
-            color: white !important;
-        }
-
+/* Biała strzałka tylko dla sidebaru */
+header[data-testid="stHeader"] button[aria-label="Open sidebar"] svg,
+header[data-testid="stHeader"] button[data-testid="collapsedControl"] svg {
+    fill: white !important;
+}
 
     </style>""", unsafe_allow_html=True)
 
