@@ -3,11 +3,11 @@ import pandas as pd
 import math
 
 # --- KONFIGURACJA ---
-st.set_page_config(page_title="Pull-Planner Max Pro", layout="wide")
+st.set_page_config(page_title="Pull-Planner v3.0", layout="wide")
 
 # --- FUNKCJA DARK MODE ---
-def zastosuj_motyw(wybrany_motyw):
-    if wybrany_motyw == "Dark":
+def zastosuj_motyw(tryb):
+    if tryb == "Dark":
         st.markdown("""<style>
             .stApp { background-color: #0e1117; color: #ffffff; }
             [data-testid="stSidebar"] { background-color: #1d2129; }
@@ -22,26 +22,29 @@ TLUMACZENIA = {
         "tytul": "⚡ Planer Przeciągania Kabli - Wersja Profesjonalna",
         "motyw": "Motyw wizualny:",
         "naciag": "Naciąg",
+        "naciag_pocz": "Naciąg początkowy (bęben)",
         "prosta": "Odcinek prosty",
         "luk": "Łuk (Zakręt)",
         "promien": "Promień łuku",
         "bezpiecznie": "✅ Wynik bezpieczny",
         "alarm": "❌ PRZEKROCZONO LIMIT!",
         "jednostki": "System jednostek:",
-        "kable": "🔌 Kable w kanale",
+        "kable": "🔌 Kable w osłonie",
         "trasa": "🛤️ Planowanie Trasy",
         "dodaj": "Dodaj",
         "wyczysc": "Wyczyść",
         "tarcie": "Współczynnik tarcia (μ)",
-        "rura": "📏 Geometria Osłony (D)",
+        "oslona": "📏 Typ i Geometria Osłony",
+        "o_rura": "Rura okrągła",
+        "o_kanal": "Kanał prostokątny",
         "analiza": "📊 Analiza Techniczna",
-        "jam_error": "🚨 RYZYKO ZAKLINOWANIA!",
         "swp": "Nacisk boczny (SWP)"
     },
     "EN": {
         "tytul": "⚡ Professional Cable Pull-Planner Pro",
         "motyw": "Visual Theme:",
         "naciag": "Tension",
+        "naciag_pocz": "Initial Tension (drum)",
         "prosta": "Straight section",
         "luk": "Bend",
         "promien": "Bend Radius",
@@ -53,14 +56,15 @@ TLUMACZENIA = {
         "dodaj": "Add",
         "wyczysc": "Clear",
         "tarcie": "Friction (μ)",
-        "rura": "📏 Conduit Geometry (D)",
+        "oslona": "📏 Conduit Type & Geometry",
+        "o_rura": "Round Conduit",
+        "o_kanal": "Rectangular Duct",
         "analiza": "📊 Technical Analysis",
-        "jam_error": "🚨 JAMMING RISK!",
         "swp": "Sidewall Pressure (SWP)"
     }
 }
 
-# --- SIDEBAR (USTAWIENIA) ---
+# --- SIDEBAR ---
 with st.sidebar:
     jezyk = st.radio("Język / Language:", ["PL", "EN"], horizontal=True)
     txt = TLUMACZENIA[jezyk]
@@ -73,18 +77,26 @@ with st.sidebar:
     wybrany_sys = st.radio(txt["jednostki"], ["Metric (N)", "Metric (kN)", "USA (lb)"])
     
     if "kN" in wybrany_sys:
-        j_sila = "kN"; m_N = 1000.0; m_ekr = 0.001; g = 9.81; u_len = "m"
+        j_sila = "kN"; m_na_N = 1000.0; m_ekr = 0.001; g = 9.81; u_len = "m"
     elif "lb" in wybrany_sys:
-        j_sila = "lb"; m_N = 1.0; m_ekr = 1.0; g = 1.0; u_len = "ft"
+        j_sila = "lb"; m_na_N = 1.0; m_ekr = 1.0; g = 1.0; u_len = "ft"
     else:
-        j_sila = "N"; m_N = 1.0; m_ekr = 1.0; g = 9.81; u_len = "m"
+        j_sila = "N"; m_na_N = 1.0; m_ekr = 1.0; g = 9.81; u_len = "m"
 
     mu = st.slider(txt["tarcie"], 0.1, 0.6, 0.35)
+    t_start_uzyt = st.number_input(f"{txt['naciag_pocz']} ({j_sila})", value=0.0)
     limit_uzytkownika = st.number_input(f"Limit ({j_sila})", value=10.0 if j_sila=="kN" else 5000.0)
-    limit_N = limit_uzytkownika * m_N
+    limit_N = limit_uzytkownika * m_na_N
 
-    st.header(txt["rura"])
-    D_wew = st.number_input("Średnica wewn. rury D", value=100.0)
+    st.header(txt["oslona"])
+    typ_oslony = st.radio("Typ:", [txt["o_rura"], txt["o_kanal"]])
+    if typ_oslony == txt["o_rura"]:
+        D_wew = st.number_input("Średnica wewn. D", value=100.0)
+        H_wew = D_wew
+    else:
+        W_wew = st.number_input("Szerokość (W)", value=200.0)
+        H_wew = st.number_input("Wysokość (H)", value=100.0)
+        D_wew = 9999 # Wyłączamy Jam Ratio
 
     st.header(txt["kable"])
     if 'kable' not in st.session_state: st.session_state.kable = []
@@ -97,28 +109,28 @@ with st.sidebar:
         if st.button(f"🗑️ {txt['wyczysc']} (k)"): 
             st.session_state.kable = []; st.rerun()
 
-# --- INTERFEJS GŁÓWNY & ANALIZA ---
+# --- ANALIZA TECHNICZNA ---
 st.title(txt["tytul"])
-
 if st.session_state.kable:
     st.subheader(txt["analiza"])
     max_d = max([k['d'] for k in st.session_state.kable])
-    jam_ratio = D_wew / max_d
-    c1, c2 = st.columns(2)
-    c1.metric("Jam Ratio", round(jam_ratio, 2))
-    c2.metric(f"Clearance ({u_len})", round(D_wew - max_d, 1))
-    if 2.8 <= jam_ratio <= 3.2: st.error(txt["jam_error"])
+    col1, col2 = st.columns(2)
+    if typ_oslony == txt["o_rura"]:
+        jam_ratio = D_wew / max_d
+        col1.metric("Jam Ratio", round(jam_ratio, 2))
+        if 2.8 <= jam_ratio <= 3.2: st.error("🚨 RYZYKO ZAKLINOWANIA (Jamming)!")
+    col2.metric(f"Prześwit / Clearance ({u_len})", round(H_wew - max_d, 1))
 
 # --- TRASA ---
 if 'trasa' not in st.session_state: st.session_state.trasa = []
 st.subheader(txt["trasa"])
-col1, col2, col3 = st.columns([2, 2, 3])
-with col1: typ = st.selectbox("Typ", [txt["prosta"], txt["luk"]])
-with col2: val = st.number_input("Długość/Kąt", value=10.0)
-with col3:
+c1, c2, c3 = st.columns([2, 2, 3])
+with c1: typ = st.selectbox("Typ", [txt["prosta"], txt["luk"]])
+with c2: val = st.number_input("Długość/Kąt", value=10.0)
+with c3:
     if typ == txt["prosta"]:
         tryb_n = st.radio("Jedn.:", ["°", "%"], horizontal=True)
-        nachylenie = st.number_input("Wartość", value=0.0)
+        nachylenie = st.number_input("Wartość (+/-)", value=0.0)
         promien = 0.0
     else:
         promien = st.number_input(txt["promien"], value=1.0)
@@ -129,19 +141,16 @@ if st.button(f"➕ {txt['dodaj']} odcinek"):
 
 # --- OBLICZENIA ---
 if st.session_state.trasa:
-    naciag_N = 0.0
+    naciag_N = t_start_uzyt * m_na_N
     num_k = len(st.session_state.kable)
-    waga_total = sum([k['w'] for k in st.session_state.kable]) if num_k > 0 else 0.0
+    waga_total = sum([k['w'] for k in st.session_state.kable])
     
-    # Wyznaczanie Weight Correction (wc) - Cradle Configuration
-    wc = 1.0
-    if num_k >= 3 and D_wew > max_d:
-        ratio = D_wew / max_d
-        wc = 1 + (4/3) * (1 / (ratio - 1))**2
+    wc = 1.0 # Weight Correction
+    if typ_oslony == txt["o_rura"] and num_k >= 3:
+        wc = 1 + (4/3) * (1 / ((D_wew / max_d) - 1))**2
 
     wyniki = []
     for i, s in enumerate(st.session_state.trasa):
-        t_in = naciag_N
         if s["typ"] == txt["prosta"]:
             theta = math.radians(s["slope"]) if s["s_mode"] == "°" else math.atan(s['slope']/100)
             naciag_N += s["val"] * waga_total * g * (mu * wc * math.cos(theta) + math.sin(theta))
@@ -159,10 +168,8 @@ if st.session_state.trasa:
         })
 
     st.table(pd.DataFrame(wyniki))
-    
-    final_ekr = naciag_N * m_ekr
-    if naciag_N > limit_N: st.error(f"{txt['alarm']} ({round(final_ekr, 2)} {j_sila})")
-    else: st.success(f"{txt['bezpiecznie']} ({round(final_ekr, 2)} {j_sila})")
-
-    if st.button(f"🗑️ {txt['wyczysc']} (t)"): 
+    f_ekr = naciag_N * m_ekr
+    if naciag_N > limit_N: st.error(f"{txt['alarm']} ({round(f_ekr, 2)} {j_sila})")
+    else: st.success(f"{txt['bezpiecznie']} ({round(f_ekr, 2)} {j_sila})")
+    if st.button(f"🗑️ {txt['wyczysc']} (trasa)"): 
         st.session_state.trasa = []; st.rerun()
