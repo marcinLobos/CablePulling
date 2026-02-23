@@ -29,6 +29,9 @@ if 'trasa' not in st.session_state:
 def zastosuj_stylizacje_premium():
     st.markdown("""
     <style>
+
+    .stApp { border: 10px solid yellow !important; }
+    
         /* Przycisk otwierania panelu - WIDOCZNY ZAWSZE (Red Alert Style) */
         button[data-testid="collapsedControl"] {
         background-color: #ff0000 !important; /* Czysta czerwień */
