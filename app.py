@@ -368,12 +368,12 @@ if st.session_state.trasa:
             swp_val = naciag_N / r if r > 0 else 0.0
             opis = f"{txt['luk']} {krok['val']}° ({krok['plane']})"
 
-    # Bezpieczniki i statystyki
-    naciag_N = max(0.1, naciag_N) # naciag nie może być zerowy po łuku
-    suma_L += d_rzecz
+        # Bezpieczniki i statystyki
+        naciag_N = max(0.1, naciag_N) # naciag nie może być zerowy po łuku
+        suma_L += d_rzecz
     
     # Budowanie tabeli zgodnie z Twoim schematem
-    tabela_wynikow.append({
+        tabela_wynikow.append({
         "#": i+1,
         "Typ": opis,
         txt["l_rzecz"]: f"{round(d_rzecz, 2)} {u_dl}",
