@@ -320,40 +320,40 @@ if st.session_state.trasa:
     tabela_wynikow = []
 
     for i, krok in enumerate(st.session_state.trasa):
-    if krok["id"] == "straight":
-        # Odcinek prosty (uwzględnia kąt nachylenia theta)
-        theta = math.atan(krok["slope"] / 100)
-        # Wzór: T2 = T1 + L * W * (mu * cos(theta) + sin(theta))
-        naciag_N += krok["val"] * suma_wag * g * (mu_f * wc_factor * math.cos(theta) + math.sin(theta))
-        
-        d_rzecz = krok["val"]
-        swp_val = 0.0
-        opis = txt["prosta"]
-    else:
-        # Łuk (uwzględnia płaszczyznę gięcia)
-        phi = math.radians(krok["val"])
-        w = suma_wag * g  # waga jednostkowa [N/m]
-        r = krok["r"]
-        
-        # Wykładnik tarcia (Capstan exponent)
-        exponent = mu_f * wc_factor * phi
-        
-        if krok["plane"] == txt["poziom"]:
-            # Standardowy łuk poziomy (Capstan Equation)
-            naciag_N *= math.exp(exponent)
+        if krok["id"] == "straight":
+            # Odcinek prosty (uwzględnia kąt nachylenia theta)
+            theta = math.atan(krok["slope"] / 100)
+            # Wzór: T2 = T1 + L * W * (mu * cos(theta) + sin(theta))
+            naciag_N += krok["val"] * suma_wag * g * (mu_f * wc_factor * math.cos(theta) + math.sin(theta))
+            
+            d_rzecz = krok["val"]
+            swp_val = 0.0
+            opis = txt["prosta"]
         else:
-            # Łuki pionowe - Równanie Riffena (podejście wykładnicze)
-            if krok["plane"] == txt["dol"]:
-                # Grawitacja dociąga kabel do dna rury na łuku
-                naciag_N = (naciag_N + w * r) * math.exp(exponent) - w * r
-            elif krok["plane"] == txt["gora"]:
-                # Grawitacja próbuje oderwać kabel od łuku
-                naciag_N = (naciag_N - w * r) * math.exp(exponent) + w * r
-        
-        d_rzecz = phi * r
-        # SWP (Side Wall Pressure) = Naciąg wyjściowy / Promień
-        swp_val = naciag_N / r if r > 0 else 0.0
-        opis = f"{txt['luk']} {krok['val']}° ({krok['plane']})"
+            # Łuk (uwzględnia płaszczyznę gięcia)
+            phi = math.radians(krok["val"])
+            w = suma_wag * g  # waga jednostkowa [N/m]
+            r = krok["r"]
+            
+            # Wykładnik tarcia (Capstan exponent)
+            exponent = mu_f * wc_factor * phi
+            
+            if krok["plane"] == txt["poziom"]:
+                # Standardowy łuk poziomy (Capstan Equation)
+                naciag_N *= math.exp(exponent)
+            else:
+                # Łuki pionowe - Równanie Riffena (podejście wykładnicze)
+                if krok["plane"] == txt["dol"]:
+                    # Grawitacja dociąga kabel do dna rury na łuku
+                    naciag_N = (naciag_N + w * r) * math.exp(exponent) - w * r
+                elif krok["plane"] == txt["gora"]:
+                    # Grawitacja próbuje oderwać kabel od łuku
+                    naciag_N = (naciag_N - w * r) * math.exp(exponent) + w * r
+            
+            d_rzecz = phi * r
+            # SWP (Side Wall Pressure) = Naciąg wyjściowy / Promień
+            swp_val = naciag_N / r if r > 0 else 0.0
+            opis = f"{txt['luk']} {krok['val']}° ({krok['plane']})"
 
     # Bezpieczniki i statystyki
     naciag_N = max(0.1, naciag_N) # naciag nie może być zerowy po łuku
