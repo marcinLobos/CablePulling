@@ -189,7 +189,8 @@ TLUMACZENIA = {
         "angle": "kąt",
         "radius": "promień",
         "length": "długość",
-        "f_coef": "współczynnik tarcia"
+        "f_coef": "współczynnik tarcia",
+        "mode": "Tryb"
     },
     "EN": {
         "tytul": "⚡ 3D Cable Pull-Planner (v5.0)",
@@ -227,7 +228,8 @@ TLUMACZENIA = {
         "angle": "angle",
         "radius": "radius",
         "length": "length",
-        "f_coef": "friction coefficient" # Ważne dla logiki obliczeń
+        "f_coef": "friction coefficient",
+        "mode": "Mode"
     }
 }
 
@@ -307,7 +309,7 @@ if st.session_state.kable:
     col_a, col_b, col_c = st.columns(3)
     col_a.metric("Jam Ratio", round(jam_r, 2))
     col_b.metric("Weight Factor", round(wc_factor, 3))
-    col_b.metric("Clearance", f"{round(D_wewn - max_d_kabla, 1)} mm")
+    col_b.metric("Clearance", f"{round(D_wewn - max_d_kabla, 1)} {s_jedn}")
 
 # Dodawanie elementów trasy
 st.subheader(txt["trasa"])
@@ -332,7 +334,7 @@ with r2:
 with r3:
     if t_id == "straight":
         # WYBÓR TRYBU NACHYLENIA
-        tryb_nach = st.radio("Mode:", ["%", "°"], horizontal=True, key="slope_mode")
+        tryb_nach = st.radio(txt["mode"], ["%", "°"], horizontal=True, key="slope_mode")
         if tryb_nach == "%":
             nach_val = st.number_input(f"{txt['slope']} (%)", value=0.0)
         else:
@@ -344,7 +346,7 @@ with r3:
         r_bend = st.number_input(f"{txt['radius']} R ({u_dl})", value=1.0)
         nach_val = 0.0
 
-if st.button(f"➕ {txt['dodaj']} txt['route_el']"):
+if st.button(f"➕ {txt['dodaj']} {txt['route_el']}"):
     st.session_state.trasa.append({
         "id": t_id, 
         "val": v_size, 
