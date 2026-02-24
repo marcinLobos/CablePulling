@@ -177,7 +177,17 @@ TLUMACZENIA = {
         "u_sred": "Średnica kabla",  # Dodany klucz
         "u_waga": "Waga kabla",      # Dodany klucz
         "poziom": "Poziomo"  ,        # Ważne dla logiki obliczeń
-        "route_el": "element trasy"
+        "route_el": "element trasy",
+        "kabel": "kabel",
+        "del": "usuń",
+        "in_diameter": "średnica wewnętrzna/szerokość",
+        "in_height": "wysokość kanału",
+        "start_tension": "naciąg początkowy",
+        "elbow_angle": "kąt kształtki",
+        "input_angle": "wpisz kąt",
+        "slope": "nachylenie",
+        "angle": "kąt",
+        "radius": "promień"
     },
     "EN": {
         "tytul": "⚡ 3D Cable Pull-Planner (v5.0)",
@@ -203,13 +213,20 @@ TLUMACZENIA = {
         "u_sred": "Cable Diameter", # Dodany klucz
         "u_waga": "Cable Weight",    # Dodany klucz
         "poziom": "Horizontal" ,
-        "route_el": "route element"     # Ważne dla logiki obliczeń
+        "route_el": "route element"  ,
+        "kabel": "cable",
+        "del": "delete" ,
+        "in_diameter": "inside diameter/width ",
+        "in_height": "height of duct",
+        "start_tension": "start tension" ,
+        "elbow_angle": "elbow angle",
+        "input_angle": "input angle",
+        "slope": "slope",
+        "angle": "angle",
+        "radius": "radius" # Ważne dla logiki obliczeń
     }
 }
 
-# =================================================================
-# 5. PANEL BOCZNY (SIDEBAR) - WEJŚCIE DANYCH
-# =================================================================
 # =================================================================
 # 5. PANEL BOCZNY (SIDEBAR) - WEJŚCIE DANYCH
 # =================================================================
@@ -245,26 +262,26 @@ with st.sidebar:
     d_kabla = st.sidebar.number_input(f"{txt['u_sred']} [{s_jedn}]", value=30.0)
     w_kabla = st.sidebar.number_input(f"{txt['u_waga']} [{w_jedn}]", value=1.5)
 
-    if st.button(f"➕ {txt['dodaj']} kabel"):
+    if st.button(f"➕ {txt['dodaj']} {txt['kabel']}"):
         st.session_state.kable.append({"d": d_kabla, "w": w_kabla})
     
     if st.session_state.kable:
         st.table(pd.DataFrame(st.session_state.kable))
-        if st.button("🗑️ Usuń kable"):
+        if st.button(f"🗑️ {txt['del']} {txt['kabel']}"):
             st.session_state.kable = []
             st.rerun()
 
     # Parametry osłony (Też dodajmy jednostki s_jedn)
     st.header(txt["oslona"])
     typ_oslony = st.radio("Typ:", [txt["o_rura"], txt["o_kanal"]])
-    D_wewn = st.number_input(f"Średnica wewn. [{s_jedn}]", value=100.0)
+    D_wewn = st.number_input(f"{txt['in_diameter']} [{s_jedn}]", value=100.0)
     if typ_oslony == txt["o_kanal"]:
-        W_wewn = st.number_input(f"Szerokość [{s_jedn}]", value=200.0)
+        W_wewn = st.number_input(f"{txt['in_height']} [{s_jedn}]", value=200.0)
 
     # Współczynniki tarcia i limity
     st.divider()
     mu_f = st.slider("Wsp. tarcia (μ)", 0.1, 0.6, 0.35)
-    t_start = st.number_input(f"Naciąg pocz. ({j_sila})", value=0.0)
+    t_start = st.number_input(f"{txt['start_tension']} ({j_sila})", value=0.0)
     t_limit = st.number_input(f"Limit ({j_sila})", value=10.0 if "kN" in j_sila else 5000.0)
 
 # =================================================================
@@ -301,9 +318,9 @@ with r2:
         v_size = st.number_input(f"Długość ({u_dl})", value=10.0)
         v_dir = txt["poz"]
     else:
-        v_size = st.selectbox("Kąt kształtki", ["15°", "30°", "45°", "60°", "90°", "Inny"])
+        v_size = st.selectbox(txt["elbow_angle"], ["15°", "30°", "45°", "60°", "90°", "Inny"])
         if v_size == "Inny":
-            v_size = st.number_input("Wpisz kąt (°)", value=22.5)
+            v_size = st.number_input(f"{txt['input_angle']} (°)", value=22.5)
         else:
             v_size = float(v_size.replace("°", ""))
         v_dir = st.selectbox(txt["plaszczyzna"], [txt["poz"], txt["dol"], txt["gora"]])
@@ -313,14 +330,14 @@ with r3:
         # WYBÓR TRYBU NACHYLENIA
         tryb_nach = st.radio("Mode:", ["%", "°"], horizontal=True, key="slope_mode")
         if tryb_nach == "%":
-            nach_val = st.number_input("Nachylenie (%)", value=0.0)
+            nach_val = st.number_input(f"{txt['slope']} (%)", value=0.0)
         else:
-            kat_deg = st.number_input("Kąt (°)", value=0.0)
+            kat_deg = st.number_input(f"{txt['angle']} (°)", value=0.0)
             # Konwersja: procenty = tan(kąt) * 100
             nach_val = math.tan(math.radians(kat_deg)) * 100
         r_bend = 0.0
     else:
-        r_bend = st.number_input(f"Promień R ({u_dl})", value=1.0)
+        r_bend = st.number_input(f"{txt['radius']} R ({u_dl})", value=1.0)
         nach_val = 0.0
 
 if st.button(f"➕ {txt['dodaj']} txt['route_el']"):
