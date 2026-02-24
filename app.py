@@ -320,42 +320,53 @@ if st.session_state.trasa:
     tabela_wynikow = []
 
     for i, krok in enumerate(st.session_state.trasa):
-        if krok["id"] == "straight":
-            # Odcinek prosty (uwzględnia kąt nachylenia)
-            theta = math.atan(krok["slope"] / 100)
-            naciag_N += krok["val"] * suma_wag * g * (mu_f * wc_factor * math.cos(theta) + math.sin(theta))
-            d_rzecz, swp_val, opis = krok["val"], 0.0, txt["prosta"]
-        else:
-            # Łuk (uwzględnia płaszczyznę gięcia)
-            phi = math.radians(krok["val"])
-            
-            # Siła dociągu grawitacyjnego (waga efektywna)
-            if krok["plane"] == txt["dol"]:
-                # Kabel dociśnięty przez grawitację
-                w_eff = math.sqrt((naciag_N/krok["r"])**2 + (suma_wag*g*math.cos(phi))**2) + (suma_wag*g*math.sin(phi))
-                naciag_N += mu_f * wc_factor * w_eff * (krok["r"] * phi)
-            elif krok["plane"] == txt["gora"]:
-                # Kabel podrywany przez grawitację
-                w_eff = math.sqrt((naciag_N/krok["r"])**2 + (suma_wag*g*math.cos(phi))**2) - (suma_wag*g*math.sin(phi))
-                naciag_N += mu_f * wc_factor * w_eff * (krok["r"] * phi)
-            else:
-                # Standardowy łuk poziomy (Capstan Equation)
-                naciag_N *= math.exp(mu_f * wc_factor * phi)
-            
-            d_rzecz = phi * krok["r"]
-            swp_val = naciag_N / krok["r"] if krok["r"] > 0 else 0.0
-            opis = f"{txt['luk']} {krok['val']}° ({krok['plane']})"
-
-        naciag_N = max(0, naciag_N)
-        suma_L += d_rzecz
+    if krok["id"] == "straight":
+        # Odcinek prosty (uwzględnia kąt nachylenia theta)
+        theta = math.atan(krok["slope"] / 100)
+        # Wzór: T2 = T1 + L * W * (mu * cos(theta) + sin(theta))
+        naciag_N += krok["val"] * suma_wag * g * (mu_f * wc_factor * math.cos(theta) + math.sin(theta))
         
-        tabela_wynikow.append({
-            "#": i+1,
-            "Typ": opis,
-            txt["l_rzecz"]: f"{round(d_rzecz, 2)} {u_dl}",
-            f"{txt['naciag']} [{j_sila}]": round(naciag_N * m_ekran, 3),
-            f"SWP [{j_sila}/{u_dl}]": round(swp_val * m_ekran, 2)
-        })
+        d_rzecz = krok["val"]
+        swp_val = 0.0
+        opis = txt["prosta"]
+    else:
+        # Łuk (uwzględnia płaszczyznę gięcia)
+        phi = math.radians(krok["val"])
+        w = suma_wag * g  # waga jednostkowa [N/m]
+        r = krok["r"]
+        
+        # Wykładnik tarcia (Capstan exponent)
+        exponent = mu_f * wc_factor * phi
+        
+        if krok["plane"] == txt["poziom"]:
+            # Standardowy łuk poziomy (Capstan Equation)
+            naciag_N *= math.exp(exponent)
+        else:
+            # Łuki pionowe - Równanie Riffena (podejście wykładnicze)
+            if krok["plane"] == txt["dol"]:
+                # Grawitacja dociąga kabel do dna rury na łuku
+                naciag_N = (naciag_N + w * r) * math.exp(exponent) - w * r
+            elif krok["plane"] == txt["gora"]:
+                # Grawitacja próbuje oderwać kabel od łuku
+                naciag_N = (naciag_N - w * r) * math.exp(exponent) + w * r
+        
+        d_rzecz = phi * r
+        # SWP (Side Wall Pressure) = Naciąg wyjściowy / Promień
+        swp_val = naciag_N / r if r > 0 else 0.0
+        opis = f"{txt['luk']} {krok['val']}° ({krok['plane']})"
+
+    # Bezpieczniki i statystyki
+    naciag_N = max(0.1, naciag_N) # naciag nie może być zerowy po łuku
+    suma_L += d_rzecz
+    
+    # Budowanie tabeli zgodnie z Twoim schematem
+    tabela_wynikow.append({
+        "#": i+1,
+        "Typ": opis,
+        txt["l_rzecz"]: f"{round(d_rzecz, 2)} {u_dl}",
+        f"{txt['naciag']} [{j_sila}]": round(naciag_N * m_ekran, 3),
+        f"SWP [{j_sila}/{u_dl}]": round(swp_val * m_ekran, 2)
+    })
 
     # Wyświetlanie wyników
     st.table(pd.DataFrame(tabela_wynikow))
