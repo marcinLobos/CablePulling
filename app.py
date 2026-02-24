@@ -176,7 +176,8 @@ TLUMACZENIA = {
         "alarm": "🚨 ALARM: Przekroczono limit naciągu!",
         "u_sred": "Średnica kabla",  # Dodany klucz
         "u_waga": "Waga kabla",      # Dodany klucz
-        "poziom": "Poziomo"          # Ważne dla logiki obliczeń
+        "poziom": "Poziomo"  ,        # Ważne dla logiki obliczeń
+        "route_el": "element trasy"
     },
     "EN": {
         "tytul": "⚡ 3D Cable Pull-Planner (v5.0)",
@@ -201,7 +202,8 @@ TLUMACZENIA = {
         "alarm": "🚨 ALARM: Tension limit exceeded!",
         "u_sred": "Cable Diameter", # Dodany klucz
         "u_waga": "Cable Weight",    # Dodany klucz
-        "poziom": "Horizontal"      # Ważne dla logiki obliczeń
+        "poziom": "Horizontal" ,
+        "route_el": "route element"     # Ważne dla logiki obliczeń
     }
 }
 
@@ -308,13 +310,20 @@ with r2:
 
 with r3:
     if t_id == "straight":
-        nach_val = st.number_input("Nachylenie (%)", value=0.0)
+        # WYBÓR TRYBU NACHYLENIA
+        tryb_nach = st.radio("Mode:", ["%", "°"], horizontal=True, key="slope_mode")
+        if tryb_nach == "%":
+            nach_val = st.number_input("Nachylenie (%)", value=0.0)
+        else:
+            kat_deg = st.number_input("Kąt (°)", value=0.0)
+            # Konwersja: procenty = tan(kąt) * 100
+            nach_val = math.tan(math.radians(kat_deg)) * 100
         r_bend = 0.0
     else:
         r_bend = st.number_input(f"Promień R ({u_dl})", value=1.0)
         nach_val = 0.0
 
-if st.button(f"➕ {txt['dodaj']} element trasy"):
+if st.button(f"➕ {txt['dodaj']} txt['route_el']"):
     st.session_state.trasa.append({
         "id": t_id, 
         "val": v_size, 
@@ -372,7 +381,7 @@ if st.session_state.trasa:
         naciag_N = max(0.1, naciag_N) # naciag nie może być zerowy po łuku
         suma_L += d_rzecz
     
-    # Budowanie tabeli zgodnie z Twoim schematem
+        # Budowanie tabeli zgodnie z Twoim schematem
         tabela_wynikow.append({
         "#": i+1,
         "Typ": opis,
