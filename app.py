@@ -299,21 +299,66 @@ st.title(txt["tytul"])
 wc_factor = 1.0
 if st.session_state.kable:
     st.subheader(txt["analiza"])
-    max_d_kabla = max([k['d'] for k in st.session_state.kable])
-    jam_r = D_wewn / max_d_kabla
     
-    # Wzór na Weight Correction Factor (dla 3+ kabli w rurze)
-    if typ_oslony == txt["o_rura"] and len(st.session_state.kable) >= 3:
-        wc_factor = 1 + (4/3) * (1 / ((D_wewn / max_d_kabla) - 1))**2
+    # --- OBLICZENIA GEOMETRII I ZAJĘTOŚCI ---
+    n_kabli = len(st.session_state.kable)
+    max_d = max([k['d'] for k in st.session_state.kable])
     
-    col_a, col_b, col_c = st.columns(3)
-    col_a.metric("Jam Ratio", round(jam_r, 2))
-    col_b.metric("Weight Factor", round(wc_factor, 3))
-    col_b.metric("Clearance", f"{round(D_wewn - max_d_kabla, 1)} {s_jedn}")
+    # Fill Ratio: Suma pól przekroju kabli / Pole przekroju rury
+    suma_pol_kabli = sum([(math.pi * k['d']**2) / 4 for k in st.session_state.kable])
+    pole_rury = (math.pi * D_wewn**2) / 4
+    fill_ratio = (suma_pol_kabli / pole_rury) * 100
+    
+    # Jam Ratio (D/d)
+    jam_r = D_wewn / max_d
+    
+    # Clearance (Luz) - reaguje na liczbę kabli
+    if n_kabli == 1:
+        clearance = D_wewn - max_d
+    else:
+        # Przy wielu kablach używamy sumy średnic jako bariery fizycznej
+        clearance = D_wewn - (sum([k['d'] for k in st.session_state.kable]) / math.sqrt(n_kabli))
 
-# Dodawanie elementów trasy
-st.subheader(txt["trasa"])
-r1, r2, r3 = st.columns([2, 3, 3])
+    # --- WIZUALIZACJA METRYK (4 KOLUMNY) ---
+    col_a, col_b, col_c, col_d = st.columns(4)
+    
+    with col_a:
+        st.metric("Jam Ratio", round(jam_r, 2))
+    
+    with col_b:
+        # Fill Ratio powyżej 40% to alarm w inżynierii
+        f_color = "normal" if fill_ratio <= 40 else "inverse"
+        st.metric("Fill Ratio", f"{round(fill_ratio, 1)}%", 
+                  delta=f"{round(fill_ratio-40,1)}%" if fill_ratio > 40 else None, 
+                  delta_color=f_color)
+    
+    with col_c:
+        st.metric("Weight Factor", round(wc_factor, 3))
+        
+    with col_d:
+        # Luz poniżej 12mm (0.5 cala) jest ryzykowny
+        c_limit = 12 if s_jedn == "mm" else 0.5
+        c_color = "normal" if clearance > c_limit else "inverse"
+        st.metric("Clearance", f"{round(clearance, 1)} {s_jedn}", delta_color=c_color)
+
+    # --- SYSTEM OSTRZEŻEŃ (Logika Mike-OS) ---
+    warns = []
+    if fill_ratio > 40:
+        warns.append(f"❌ **{('OVERFILL' if jezyk_wybor=='EN' else 'PRZEPEŁNIENIE')}:** {round(fill_ratio,1)}% > 40%!")
+    
+    if 2.8 <= jam_r <= 3.2:
+        warns.append(f"⚠️ **{('JAMMING RISK' if jezyk_wybor=='EN' else 'RYZYKO ZAKLINOWANIA')}:** Jam Ratio (2.8-3.2)!")
+        
+    if clearance < (c_limit/2):
+        warns.append(f"🚨 **{('NO SPACE' if jezyk_wybor=='EN' else 'BRAK MIEJSCA')}:** Clearance is too low!")
+
+    if warns:
+        for w in warns:
+            st.warning(w)
+    else:
+        st.success("✅ " + ("Geometry OK" if jezyk_wybor == "EN" else "Geometria OK"))
+
+st.divider()
 
 with r1:
     typ_el = st.selectbox("Element", [txt["prosta"], txt["luk"]])
