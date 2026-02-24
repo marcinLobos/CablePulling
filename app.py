@@ -188,7 +188,8 @@ TLUMACZENIA = {
         "slope": "nachylenie",
         "angle": "kąt",
         "radius": "promień",
-        "length": "długość"
+        "length": "długość",
+        "f_coef": "współczynnik tarcia"
     },
     "EN": {
         "tytul": "⚡ 3D Cable Pull-Planner (v5.0)",
@@ -225,7 +226,8 @@ TLUMACZENIA = {
         "slope": "slope",
         "angle": "angle",
         "radius": "radius",
-        "length": "length" # Ważne dla logiki obliczeń
+        "length": "length",
+        "f_coef": "friction coefficient" # Ważne dla logiki obliczeń
     }
 }
 
@@ -282,7 +284,7 @@ with st.sidebar:
 
     # Współczynniki tarcia i limity
     st.divider()
-    mu_f = st.slider("Wsp. tarcia (μ)", 0.1, 0.6, 0.35)
+    mu_f = st.slider(f"{txt['f_coef']} (μ)", 0.1, 0.6, 0.35)
     t_start = st.number_input(f"{txt['start_tension']} ({j_sila})", value=0.0)
     t_limit = st.number_input(f"Limit ({j_sila})", value=10.0 if "kN" in j_sila else 5000.0)
 
