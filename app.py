@@ -359,7 +359,7 @@ if st.session_state.kable:
         st.success("✅ " + ("Geometry OK" if jezyk_wybor == "EN" else "Geometria OK"))
 
 st.divider()
-
+r1, r2, r3 = st.columns([2, 3, 3])
 with r1:
     typ_el = st.selectbox("Element", [txt["prosta"], txt["luk"]])
     t_id = "straight" if typ_el == txt["prosta"] else "bend"
