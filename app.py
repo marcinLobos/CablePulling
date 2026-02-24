@@ -154,7 +154,7 @@ def zastosuj_stylizacje_premium():
 # =================================================================
 TLUMACZENIA = {
     "PL": {
-        "tytul": "⚡ Planer Naciągu Kabli 3D (v4.6)",
+        "tytul": "⚡ Planer Naciągu Kabli 3D (v5.0)",
         "kable": "🔌 Konfiguracja Kabli",
         "trasa": "🛤️ Projekt Trasy",
         "oslona": "📏 Parametry Osłony",
@@ -172,10 +172,14 @@ TLUMACZENIA = {
         "gora": "Pionowo w górę (Odciąża)",
         "dodaj": "Dodaj do projektu",
         "wyczysc": "Wyczyść wszystko",
-        "limit": "Limit bezpieczeństwa"
+        "limit": "Limit bezpieczeństwa",
+        "alarm": "🚨 ALARM: Przekroczono limit naciągu!",
+        "u_sred": "Średnica kabla",  # Dodany klucz
+        "u_waga": "Waga kabla",      # Dodany klucz
+        "poziom": "Poziomo"          # Ważne dla logiki obliczeń
     },
     "EN": {
-        "tytul": "⚡ 3D Cable Pull-Planner (v4.6)",
+        "tytul": "⚡ 3D Cable Pull-Planner (v5.0)",
         "kable": "🔌 Cable Configuration",
         "trasa": "🛤️ Route Design",
         "oslona": "📏 Conduit Parameters",
@@ -193,10 +197,17 @@ TLUMACZENIA = {
         "gora": "Vertical Up (Lightened)",
         "dodaj": "Add to project",
         "wyczysc": "Clear all",
-        "limit": "Safety limit"
+        "limit": "Safety limit",
+        "alarm": "🚨 ALARM: Tension limit exceeded!",
+        "u_sred": "Cable Diameter", # Dodany klucz
+        "u_waga": "Cable Weight",    # Dodany klucz
+        "poziom": "Horizontal"      # Ważne dla logiki obliczeń
     }
 }
 
+# =================================================================
+# 5. PANEL BOCZNY (SIDEBAR) - WEJŚCIE DANYCH
+# =================================================================
 # =================================================================
 # 5. PANEL BOCZNY (SIDEBAR) - WEJŚCIE DANYCH
 # =================================================================
@@ -218,33 +229,35 @@ with st.sidebar:
     # Wybór jednostek
     st.header("Jednostki")
     sys_miar = st.radio("", ["Metric (N)", "Metric (kN)", "USA (lb)"])
+    
+    # DEFINICJA JEDNOSTEK (Musi być przed d_kabla!)
     if "kN" in sys_miar:
-        j_sila, m_N, m_ekran, g, u_dl = "kN", 1000.0, 0.001, 9.81, "m"
+        j_sila, m_N, m_ekran, g, u_dl, s_jedn, w_jedn = "kN", 1000.0, 0.001, 9.81, "m", "mm", "kg/m"
     elif "lb" in sys_miar:
-        j_sila, m_N, m_ekran, g, u_dl = "lb", 1.0, 1.0, 1.0, "ft"
+        j_sila, m_N, m_ekran, g, u_dl, s_jedn, w_jedn = "lb", 1.0, 1.0, 1.0, "ft", "in", "lb/ft"
     else:
-        j_sila, m_N, m_ekran, g, u_dl = "N", 1.0, 1.0, 9.81, "m"
+        j_sila, m_N, m_ekran, g, u_dl, s_jedn, w_jedn = "N", 1.0, 1.0, 9.81, "m", "mm", "kg/m"
 
-    # Parametry osłony
-    st.header(txt["oslona"])
-    typ_oslony = st.radio("Typ:", [txt["o_rura"], txt["o_kanal"]])
-    D_wewn = st.number_input("Średnica wewn. (mm)", value=100.0)
-    if typ_oslony == txt["o_kanal"]:
-        W_wewn = st.number_input("Szerokość (mm)", value=200.0)
-    
-    # Dodawanie kabli
-    st.header(txt["kable"])
-    c_d = st.number_input("Średnica d (mm)", value=30.0)
-    c_w = st.number_input(f"Waga ({u_dl})", value=1.0)
-    
+    # Parametry kabla (Używamy kluczy ze słownika i jednostek z if-a)
+    st.sidebar.header(txt["kable"])
+    d_kabla = st.sidebar.number_input(f"{txt['u_sred']} [{s_jedn}]", value=30.0)
+    w_kabla = st.sidebar.number_input(f"{txt['u_waga']} [{w_jedn}]", value=1.5)
+
     if st.button(f"➕ {txt['dodaj']} kabel"):
-        st.session_state.kable.append({"d": c_d, "w": c_w})
+        st.session_state.kable.append({"d": d_kabla, "w": w_kabla})
     
     if st.session_state.kable:
         st.table(pd.DataFrame(st.session_state.kable))
         if st.button("🗑️ Usuń kable"):
             st.session_state.kable = []
             st.rerun()
+
+    # Parametry osłony (Też dodajmy jednostki s_jedn)
+    st.header(txt["oslona"])
+    typ_oslony = st.radio("Typ:", [txt["o_rura"], txt["o_kanal"]])
+    D_wewn = st.number_input(f"Średnica wewn. [{s_jedn}]", value=100.0)
+    if typ_oslony == txt["o_kanal"]:
+        W_wewn = st.number_input(f"Szerokość [{s_jedn}]", value=200.0)
 
     # Współczynniki tarcia i limity
     st.divider()
@@ -388,4 +401,4 @@ if st.session_state.trasa:
 # =================================================================
 # 8. STOPKA SYSTEMOWA
 # =================================================================
-st.caption(f"Mike-OS v4.6 Ready. System state: Stable. Gravity engine: Active.")
+st.caption(f"M-Lobos")
