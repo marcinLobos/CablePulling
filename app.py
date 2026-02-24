@@ -187,7 +187,8 @@ TLUMACZENIA = {
         "input_angle": "wpisz kąt",
         "slope": "nachylenie",
         "angle": "kąt",
-        "radius": "promień"
+        "radius": "promień",
+        "length": "długość"
     },
     "EN": {
         "tytul": "⚡ 3D Cable Pull-Planner (v5.0)",
@@ -223,7 +224,8 @@ TLUMACZENIA = {
         "input_angle": "input angle",
         "slope": "slope",
         "angle": "angle",
-        "radius": "radius" # Ważne dla logiki obliczeń
+        "radius": "radius",
+        "length": "length" # Ważne dla logiki obliczeń
     }
 }
 
@@ -315,7 +317,7 @@ with r1:
 
 with r2:
     if t_id == "straight":
-        v_size = st.number_input(f"Długość ({u_dl})", value=10.0)
+        v_size = st.number_input(f"{txt['length']} ({u_dl})", value=10.0)
         v_dir = txt["poz"]
     else:
         v_size = st.selectbox(txt["elbow_angle"], ["15°", "30°", "45°", "60°", "90°", "Inny"])
